@@ -13,6 +13,13 @@ all_todos = [
   {'id': 8, 'category': 'programming', 'description': 'Prepare a project'},
 ]
 
+@app.get("/todos/sorted")
+def get_sorted_todos(order: str):
+  if order == 'asc':
+    return sorted(all_todos, key = lambda x: x['id'])
+  elif order == 'desc':
+    return sorted(all_todos, key = lambda x: x['id'], reverse=True)
+
 # 2 query parameters
 @app.get("/todos/paginate")
 def get_paginated_todos(skip: int, limit: int):
@@ -20,11 +27,7 @@ def get_paginated_todos(skip: int, limit: int):
 
 @app.get("/todos/range/{start_id}")
 def get_range_todos(start_id: int, end_id: int):
-  results = []
-  for item in all_todos:
-    if item['id'] in range(start_id, end_id + 1):
-      results.append(item)
-  return results
+  return [item for item in all_todos if start_id <= item['id'] <= end_id]
 
 @app.get("/todos/all")
 def get_all_todos():
@@ -33,25 +36,18 @@ def get_all_todos():
 # query parameters
 @app.get("/todos/filter")
 def get_category(category: str):
-  results = []
-  for item in all_todos:
-    if item['category'] == category:
-      results.append(item)
-  return results
+  return [item for item in all_todos if item['category'] == category]
 
 # path paramters
-@app.get("/todos/n/{id}")    
+@app.get("/todos/n/{id}")
 def get_todos_till_n(id: int):
-  results = []
-  for item in all_todos:
-    if item['id'] > id:
-      break
-    results.append(item)
-  return results
+  return [item for item in all_todos if item['id'] > id]
+
+@app.get("/todos/search")
+def get_search_params(text: str):
+  return [item for item in all_todos if text.lower() in item['description'].lower()]
 
 # path parameters
 @app.get("/todos/{id}")
 def get_todo(id: int):
-  for item in all_todos:
-    if item['id'] == id:
-      return {'result': item}
+  return [item for item in all_todos if item['id'] == id][0]

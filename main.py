@@ -13,6 +13,19 @@ all_todos = [
   {'id': 8, 'category': 'programming', 'description': 'Prepare a project'},
 ]
 
+# 2 query parameters
+@app.get("/todos/paginate")
+def get_paginated_todos(skip: int, limit: int):
+  return all_todos[skip:skip+limit]
+
+@app.get("/todos/range/{start_id}")
+def get_range_todos(start_id: int, end_id: int):
+  results = []
+  for item in all_todos:
+    if item['id'] in range(start_id, end_id + 1):
+      results.append(item)
+  return results
+
 @app.get("/todos/all")
 def get_all_todos():
   return all_todos
@@ -26,13 +39,6 @@ def get_category(category: str):
       results.append(item)
   return results
 
-# path parameters
-@app.get("/todos/{id}")
-def get_todo(id: int):
-  for item in all_todos:
-    if item['id'] == id:
-      return {'result': item}
-
 # path paramters
 @app.get("/todos/n/{id}")    
 def get_todos_till_n(id: int):
@@ -42,3 +48,10 @@ def get_todos_till_n(id: int):
       break
     results.append(item)
   return results
+
+# path parameters
+@app.get("/todos/{id}")
+def get_todo(id: int):
+  for item in all_todos:
+    if item['id'] == id:
+      return {'result': item}

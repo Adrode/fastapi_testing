@@ -13,6 +13,8 @@ all_todos = [
   {'id': 8, 'category': 'programming', 'description': 'Prepare a project'},
 ]
 
+# GET
+
 @app.get("/todos/sorted")
 def get_sorted_todos(order: str):
   if order == 'asc':
@@ -41,7 +43,7 @@ def get_category(category: str):
 # path paramters
 @app.get("/todos/n/{id}")
 def get_todos_till_n(id: int):
-  return [item for item in all_todos if item['id'] > id]
+  return all_todos[:id]
 
 @app.get("/todos/search")
 def get_search_params(text: str):
@@ -51,3 +53,18 @@ def get_search_params(text: str):
 @app.get("/todos/{id}")
 def get_todo(id: int):
   return [item for item in all_todos if item['id'] == id][0]
+
+# POST
+
+@app.post("/todos/new_todo")
+def post_new_todo(todo: dict):
+  new_todo_id = max(item['id'] for item in all_todos) + 1
+  
+  new_todo = {
+    'id': new_todo_id,
+    'category': todo['category'],
+    'description': todo['description']
+  }
+
+  all_todos.append(new_todo)
+  return new_todo

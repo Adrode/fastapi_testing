@@ -1,6 +1,14 @@
 from fastapi import FastAPI
+from enum import Enum
 
 app = FastAPI()
+
+class CategoryEnum(str, Enum):
+  sports = "sports"
+  programming = "programming"
+  reading = "reading"
+  meditating = "meditating"
+  food = "food"
 
 all_todos = [
   {'id': 1, 'category': 'sports', 'description': 'Go to the gym'},
@@ -36,9 +44,9 @@ def get_all_todos():
   return all_todos
 
 # query parameters
-@app.get("/todos/filter")
-def get_category(category: str):
-  return [item for item in all_todos if item['category'] == category]
+@app.get("/todos/by-category/{category}")
+def get_category(category: CategoryEnum):
+  return [item for item in all_todos if item['category'] == category.value]
 
 # path paramters
 @app.get("/todos/n/{id}")

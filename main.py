@@ -10,6 +10,15 @@ class CategoryEnum(str, Enum):
   meditating = "meditating"
   food = "food"
 
+class SortFieldEnum(str, Enum):
+  id = "id"
+  category = "category"
+  description = "description"
+
+class OrderEnum(str, Enum):
+  asc = "asc"
+  desc = "desc"
+
 all_todos = [
   {'id': 1, 'category': 'sports', 'description': 'Go to the gym'},
   {'id': 2, 'category': 'programming', 'description': 'Learn for 2h'},
@@ -23,12 +32,12 @@ all_todos = [
 
 # GET
 
-@app.get("/todos/sorted")
-def get_sorted_todos(order: str):
-  if order == 'asc':
-    return sorted(all_todos, key = lambda x: x['id'])
-  elif order == 'desc':
-    return sorted(all_todos, key = lambda x: x['id'], reverse=True)
+@app.get("/todos/sort-by/{field}")
+def get_sorted_todos(field: SortFieldEnum, order: OrderEnum):
+  if order.value == 'asc':
+    return sorted(all_todos, key = lambda x: x[field.value])
+  elif order.value == 'desc':
+    return sorted(all_todos, key = lambda x: x[field.value], reverse=True)
 
 # 2 query parameters
 @app.get("/todos/paginate")
@@ -57,13 +66,7 @@ def get_todos_till_n(id: int):
 def get_search_params(text: str):
   return [item for item in all_todos if text.lower() in item['description'].lower()]
 
-# path parameters
-@app.get("/todos/{id}")
-def get_todo(id: int):
-  return [item for item in all_todos if item['id'] == id][0]
-
 # POST
-
 @app.post("/todos/new_todo")
 def post_new_todo(todo: dict):
   new_todo_id = max(item['id'] for item in all_todos) + 1
@@ -76,3 +79,17 @@ def post_new_todo(todo: dict):
 
   all_todos.append(new_todo)
   return new_todo
+
+# double Enums
+@app.get("/todos/{category}/{order}")
+def get_sorted_by_categories(category: CategoryEnum, order: OrderEnum):
+  print_todos = [item for item in all_todos if item['category'] == category.value]
+  if order.value == 'asc':
+    return sorted(print_todos, key = lambda x: x['id'])
+  elif order.value == 'desc':
+    return sorted(print_todos, key = lambda x: x['id'], reverse=True)
+  
+# path parameters
+@app.get("/todos/{id}")
+def get_todo(id: int):
+  return [item for item in all_todos if item['id'] == id][0]

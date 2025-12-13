@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from enum import Enum
+from pydantic import BaseModel
+from typing import Annotated
 
 app = FastAPI()
 
@@ -19,6 +21,10 @@ class OrderEnum(str, Enum):
   asc = "asc"
   desc = "desc"
 
+class TodoCreate(BaseModel):
+  category: str
+  description: str
+
 all_todos = [
   {'id': 1, 'category': 'sports', 'description': 'Go to the gym'},
   {'id': 2, 'category': 'programming', 'description': 'Learn for 2h'},
@@ -35,6 +41,16 @@ all_todos = [
 ]
 
 # GET
+
+@app.get("/todos/search-validated")
+def search_validated(
+  text: Annotated[str, Query(min_length=3, max_length=50)],
+  category: Annotated[str | None, Query(description="Filter by category")] = None
+):  
+  by_category = [item for item in all_todos if item['category'] == category] if category else all_todos
+  filtered = [item for item in by_category if text.lower() in item['description'].lower()]
+  
+  return filtered
 
 @app.get("/todos/sort-by/{field}")
 def get_sorted_todos(field: SortFieldEnum, order: OrderEnum):
@@ -82,13 +98,13 @@ def get_search_params(text: str):
 
 # POST
 @app.post("/todos/new_todo")
-def post_new_todo(todo: dict):
+def post_new_todo(todo: TodoCreate):
   new_todo_id = max(item['id'] for item in all_todos) + 1
   
   new_todo = {
     'id': new_todo_id,
-    'category': todo['category'],
-    'description': todo['description']
+    'category': todo.category,
+    'description': todo.description
   }
 
   all_todos.append(new_todo)

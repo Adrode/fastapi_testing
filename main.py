@@ -28,6 +28,10 @@ all_todos = [
   {'id': 6, 'category': 'sports', 'description': 'Run for 30 minutes'},
   {'id': 7, 'category': 'food', 'description': 'Prepare recipes'},
   {'id': 8, 'category': 'programming', 'description': 'Prepare a project'},
+  {'id': 9, 'category': 'sports', 'description': 'Go to the gym'},
+  {'id': 10, 'category': 'sports', 'description': 'Go to the gym'},
+  {'id': 11, 'category': 'sports', 'description': 'Go to the gym'},
+  {'id': 12, 'category': 'sports', 'description': 'Go to the gym'},
 ]
 
 # GET
@@ -38,6 +42,16 @@ def get_sorted_todos(field: SortFieldEnum, order: OrderEnum):
     return sorted(all_todos, key = lambda x: x[field.value])
   elif order.value == 'desc':
     return sorted(all_todos, key = lambda x: x[field.value], reverse=True)
+
+@app.get("/todos/filter")
+def get_filtered_category(
+  category: str | None = None,
+  limit: int = 10,
+  skip: int = 0
+):
+  filtered_todos = [item for item in all_todos if item['category'] == category] if category else all_todos
+
+  return filtered_todos[skip:skip+limit]
 
 # 2 query parameters
 @app.get("/todos/paginate")
